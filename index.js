@@ -17,7 +17,23 @@ let readAllFileInFolder = (dirname) => {
     });
   });
 };
-
+let getAllXMLFileInFolder = (path) => {
+  let data = [];
+  return new Promise((resolve, rej) => {
+    fs.readdir(path, function (err, filenames) {
+      if (err) {
+        rej(err);
+        return;
+      }
+      filenames.map((filename, i) => {
+        data.push(filename);
+        if (i == filenames.length - 1) {
+          resolve(data.filter((x) => x.split(".")[1] == "xml"));
+        }
+      });
+    });
+  });
+};
 let readAndParseXML = (file, otherFIlter = []) => {
   return new Promise((resolve, rej) => {
     fs.readFile(file, function (err, data) {
@@ -59,4 +75,12 @@ let doTheWork = (imgFolder, xmlFile, nameOfFileToExport) => {
 };
 
 // ------------------------------- test -------------------------- //
-doTheWork("./", "./Bernier_Art_Prix.xml", "reultat.txt");
+let finishJOB = (xmlFolder, imgFolder) => {
+  getAllXMLFileInFolder(xmlFolder).then((data) => {
+    data.map((file) =>
+      doTheWork(imgFolder, xmlFolder + "/" + file, file.split(".")[0] + ".txt")
+    );
+  });
+};
+
+finishJOB("D:/Work/Teams/Microsoft-Teams-Samples", "./");
