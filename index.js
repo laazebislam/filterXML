@@ -42,11 +42,22 @@ let readAndParseXML = (file, otherFIlter = []) => {
         return;
       }
       let json = xml.xml2js(data, { compact: true, spaces: 4 });
-
-      data = json.Workbook.Worksheet[0].Table.Row.map((x) => x.Cell)
-        .map((x) => x[0].Data._text)
+      let arrayData =
+        json.Workbook.Worksheet.length > 0
+          ? json.Workbook.Worksheet[0]
+          : json.Workbook.Worksheet;
+      data = arrayData.Table.Row.map((x) => x.Cell)
+        .map((x) => {
+          // console.log(x[0], "has");
+          if (x[0] && x[0].Data) {
+            return x[0].Data._text;
+          }
+        })
         .filter(
-          (x) => !["NA", "Disponibilité", "Valeur", ...otherFIlter].includes(x)
+          (x) =>
+            x &&
+            x.length > 0 &&
+            !["NA", "Disponibilité", "Valeur", ...otherFIlter].includes(x)
         );
 
       resolve(data);
@@ -83,4 +94,4 @@ let finishJOB = (xmlFolder, imgFolder) => {
   });
 };
 
-finishJOB("D:/Work/Teams/Microsoft-Teams-Samples", "./");
+finishJOB("D:/Work/Teams/testDoc", "./");
